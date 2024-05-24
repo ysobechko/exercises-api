@@ -1,27 +1,27 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const dbModule = require("../db");
+const dbModule = require('../db');
 
-router.post("/", async (req, res, next) => {
+router.post('/', async (req, res, next) => {
   try {
     const db = dbModule.get();
     const { username } = req.body;
 
     if (!username) {
-      return res.status(400).json({ error: "Username is required" });
+      return res.status(400).json({ error: 'Username is required' });
     }
 
     const user = await db.get(
-      "SELECT * FROM Users WHERE username = ?",
+      'SELECT * FROM Users WHERE username = ?',
       username
     );
 
     if (user) {
-      return res.status(422).json({ error: "Username already exists" });
+      return res.status(422).json({ error: 'Username already exists' });
     }
 
     const { lastID } = await db.run(
-      "INSERT INTO Users (username) VALUES (?)",
+      'INSERT INTO Users (username) VALUES (?)',
       username
     );
 
@@ -31,10 +31,10 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.get("/", async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const db = dbModule.get();
-    const users = await db.all("SELECT * FROM Users");
+    const users = await db.all('SELECT * FROM Users');
 
     res.json(users);
   } catch (error) {
