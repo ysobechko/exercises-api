@@ -2,12 +2,14 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
 
 const usersRoutes = require('./routes/users');
 const exercisesRoutes = require('./routes/exercises');
 
 require('dotenv').config();
 
+app.use(helmet());
 app.use(cors());
 app.use(express.static('public'));
 app.get('/', (req, res) => {

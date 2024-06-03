@@ -1,8 +1,9 @@
 const express = require('express');
 
-const router = express.Router();
 const dbModule = require('../db');
 const { validateDate } = require('../utils/date');
+
+const router = express.Router();
 
 router.post('/:_id/exercises', async (req, res) => {
   try {
