@@ -1,7 +1,7 @@
 const express = require('express');
 
 const dbModule = require('../db');
-const { validateDate } = require('../utils/date');
+const { validateDate, validateDateRange } = require('../utils/date');
 
 const router = express.Router();
 
@@ -24,14 +24,18 @@ router.post('/:_id/exercises', async (req, res) => {
         .json({ error: 'Description is required and should be a string' });
     }
 
-    if (isNaN(parseInt(duration))) {
-      return res.status(400).json({ error: 'Duration should be a number' });
+    const durationInt = parseInt(duration);
+
+    if (isNaN(durationInt) || durationInt <= 0) {
+      return res
+        .status(400)
+        .json({ error: 'Duration should be a positive number' });
     }
 
     if (date && !validateDate(date)) {
       return res
         .status(400)
-        .json({ error: 'Date should be in the format YYYY-MM-DD' });
+        .json({ error: 'Exercise date should be a valid date in the format YYYY-MM-DD' });
     }
 
     const exerciseDate = date || new Date().toISOString().slice(0, 10);
@@ -74,7 +78,7 @@ router.get('/:_id/logs', async (req, res, next) => {
       if (!validateDate(from)) {
         return res
           .status(400)
-          .json({ error: 'From should be a date in the format YYYY-MM-DD' });
+          .json({ error: 'From should be a valid date in the format YYYY-MM-DD' });
       }
       query += ' AND date >= ?';
       params.push(from);
@@ -84,10 +88,16 @@ router.get('/:_id/logs', async (req, res, next) => {
       if (!validateDate(to)) {
         return res
           .status(400)
-          .json({ error: 'To should be a date in the format YYYY-MM-DD' });
+          .json({ error: 'To should be a valid date in the format YYYY-MM-DD' });
       }
       query += ' AND date <= ?';
       params.push(to);
+    }
+
+    if (from && to && !validateDateRange(from, to)) {
+      return res
+        .status(400)
+        .json({ error: 'From date should be before to date' });
     }
 
     query += ' ORDER BY date ASC';
@@ -100,8 +110,10 @@ router.get('/:_id/logs', async (req, res, next) => {
     if (limit) {
       const limitNumber = parseInt(limit);
 
-      if (isNaN(limitNumber)) {
-        return res.status(400).json({ error: 'Limit should be a number' });
+      if (isNaN(limitNumber) || limitNumber <= 0) {
+        return res
+          .status(400)
+          .json({ error: 'Limit should be a positive number' });
       }
       query += ' LIMIT ?';
       params.push(limitNumber);
